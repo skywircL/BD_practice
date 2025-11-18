@@ -1,5 +1,5 @@
 import torch
-from transformers import BertTokenizer,AutoModelForSequenceClassification,TrainingArguments,Trainer
+from transformers import AutoTokenizer,AutoModelForSequenceClassification,TrainingArguments,Trainer
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
