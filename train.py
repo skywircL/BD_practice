@@ -58,6 +58,7 @@ trainer = Trainer(
     eval_dataset=val_dataset,
 )
 
+trainer.train()
 trainer.save_model("./model")
 tokenizer.save_pretrained("./model")
 
