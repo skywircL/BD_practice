@@ -16,7 +16,7 @@ class Dataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         return self.texts[idx], self.labels[idx]
 
-df = pd.read_csv('train.csv')
+df = pd.read_csv('train.csv',sep='\t')
 
 
 train_val_texts, test_texts, train_val_labels, test_labels = train_test_split(
@@ -33,11 +33,10 @@ training_args = TrainingArguments(
     output_dir='./my_food_safety_model',
     num_train_epochs=3,
     per_device_train_batch_size=64,
-    save_steps=500,
     save_total_limit=2,
     logging_dir='./logs',
     logging_steps=20,
-    save_strategy="steps",
+    save_strategy="epoch",
     load_best_model_at_end=True,
     eval_strategy="epoch",
     metric_for_best_model="eval_macro_f1",
@@ -56,6 +55,7 @@ trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=train_dataset,
+    eval_dataset=val_dataset,
 )
 
 trainer.save_model("./model")
