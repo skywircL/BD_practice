@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
-tokenizer = BertTokenizer.from_pretrained('./bert')
+tokenizer = AutoTokenizer.from_pretrained('./bert')
 model = AutoModelForSequenceClassification.from_pretrained('./bert')
 
 class Dataset(torch.utils.data.Dataset):
