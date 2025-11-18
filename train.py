@@ -39,8 +39,8 @@ train_texts, val_texts, train_labels, val_labels = train_test_split(
 
 
 
-train_dataset = Dataset(train_texts.reset_index(drop=True), train_labels.reset_index(drop=True))
-val_dataset = Dataset(val_texts.reset_index(drop=True), val_labels.reset_index(drop=True))
+train_dataset = Dataset(train_texts.reset_index(drop=True), train_labels.reset_index(drop=True),tokenizer)
+val_dataset = Dataset(val_texts.reset_index(drop=True), val_labels.reset_index(drop=True),tokenizer)
 
 
 
