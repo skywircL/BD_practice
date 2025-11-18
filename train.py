@@ -4,17 +4,29 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
+
 tokenizer = AutoTokenizer.from_pretrained('./bert')
 model = AutoModelForSequenceClassification.from_pretrained('./bert')
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, texts, labels):
+    def __init__(self, texts, labels, tokenizer):
         self.texts = texts
         self.labels = labels
+        self.encodings = tokenizer(
+            texts.tolist(),
+            truncation=True,
+            padding=True,
+            max_length=128
+        )
+        self.labels = labels.tolist()
+
     def __len__(self):
         return len(self.texts)
     def __getitem__(self, idx):
-        return self.texts[idx], self.labels[idx]
+        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
+        item["labels"] = torch.tensor(self.labels[idx])
+        return item
+
 
 df = pd.read_csv('train.csv',sep='\t')
 
@@ -25,8 +37,11 @@ train_val_texts, test_texts, train_val_labels, test_labels = train_test_split(
 train_texts, val_texts, train_labels, val_labels = train_test_split(
     train_val_texts, train_val_labels, test_size=1000, stratify=train_val_labels, random_state=42)
 
-train_dataset = Dataset(train_texts, train_labels)
-val_dataset = Dataset(val_texts, val_labels)
+
+
+train_dataset = Dataset(train_texts.reset_index(drop=True), train_labels.reset_index(drop=True))
+val_dataset = Dataset(val_texts.reset_index(drop=True), val_labels.reset_index(drop=True))
+
 
 
 training_args = TrainingArguments(
@@ -41,7 +56,7 @@ training_args = TrainingArguments(
     eval_strategy="epoch",
     metric_for_best_model="eval_macro_f1",
 
-    learning_rate=1e-3,
+    learning_rate=3e-5,
     warmup_steps=200,
     weight_decay=1e-4,
     fp16=True,
