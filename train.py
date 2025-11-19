@@ -76,10 +76,10 @@ training_args = TrainingArguments(
     learning_rate=3e-5,
     warmup_steps=200,
     weight_decay=1e-4,
-    fp16=True,
-    dataloader_num_workers=8,
+
+    dataloader_num_workers=4,
     report_to="none",                  # 不推送到 wandb
-    torch_compile=True,
+    torch_compile=False,
 
 )
 
