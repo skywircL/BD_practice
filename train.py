@@ -77,7 +77,7 @@ training_args = TrainingArguments(
     warmup_steps=200,
     weight_decay=1e-4,
     bf16=True,
-    dataloader_num_workers=4,
+    dataloader_num_workers=0,
     report_to="none",                  # 不推送到 wandb
     torch_compile=False,
 
