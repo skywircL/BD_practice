@@ -34,7 +34,7 @@ model.eval()   # 推理模式
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
-df = pd.read_csv('test_new.csv',sep='\t')
+df = pd.read_csv('test_new.csv')
 
 id = df['id']
 comment = df['comment'].tolist()
