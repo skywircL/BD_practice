@@ -2,6 +2,8 @@ import torch
 from transformers import AutoTokenizer,AutoModelForSequenceClassification,TrainingArguments,Trainer
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score, accuracy_score
+import numpy as np
 
 
 
@@ -26,6 +28,21 @@ class Dataset(torch.utils.data.Dataset):
         item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
         item["labels"] = torch.tensor(self.labels[idx])
         return item
+
+
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+
+    macro_f1 = f1_score(labels, predictions, average='macro')
+    micro_f1 = f1_score(labels, predictions, average='micro')
+    acc = accuracy_score(labels, predictions)
+
+    return {
+        "eval_macro_f1": macro_f1,  # 必须加上这个 key
+        "eval_micro_f1": micro_f1,
+        "eval_accuracy": acc,
+    }
 
 
 df = pd.read_csv('train.csv',sep='\t')
@@ -71,6 +88,7 @@ trainer = Trainer(
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=val_dataset,
+    compute_metrics=compute_metrics,
 )
 
 trainer.train()
