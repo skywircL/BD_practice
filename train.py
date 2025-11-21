@@ -4,8 +4,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score, accuracy_score
 import numpy as np
-
-
+import re
+import jieba
 
 tokenizer = AutoTokenizer.from_pretrained('./bert')
 model = AutoModelForSequenceClassification.from_pretrained('./bert')
@@ -46,7 +46,14 @@ def compute_metrics(eval_pred):
 
 
 df = pd.read_csv('train.csv',sep='\t')
-
+# 进行数据清洗
+def clean_text(text):
+    # 只删掉 @ # $ % ^ & * ( ) - _ + = [ ] { } | \ / < > ~ 《》 「」 etc.
+    # 但保留 ，。！？；：“”‘’和所有表情
+    regex = re.compile(r'[^\u4e00-\u9fa5aA-Za-z0-9，。！？；：“”‘’\u3000-\u301f\u3040-\u318f\u31a0-\u31ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]')
+    text = regex.sub(' ', text)
+    return text.strip()
+df['comment'] = df['comment'].astype(str).apply(clean_text)
 
 train_val_texts, test_texts, train_val_labels, test_labels = train_test_split(
     df['comment'], df['label'], test_size=1000, stratify=df['label'], random_state=42)
