@@ -6,24 +6,9 @@ from sklearn.metrics import f1_score, accuracy_score
 import numpy as np
 import re
 import jieba
-from peft import LoraConfig, TaskType, get_peft_model
 
 tokenizer = AutoTokenizer.from_pretrained('./bert')
 model = AutoModelForSequenceClassification.from_pretrained('./bert')
-
-config = LoraConfig(
-    task_type=TaskType.SEQ_CLS, # 任务类型，对于序列分类任务，应设置为 SEQ_CLS
-    inference_mode=False,     # 设置为 False，因为我们正在进行训练
-    r=16,                     # LoRA 的秩，是关键超参数。常用的值有 8, 16, 32。r 越大，可训练参数越多，表达能力越强，但计算成本也越高。
-    lora_alpha=32,            # LoRA 的缩放因子，通常设置为 r 的两倍。
-    lora_dropout=0.1,         # LoRA 层的 Dropout 概率。
-    target_modules=["Wqkv", "Wo"], # 指定要应用 LoRA 的模块。对于 BERT 模型，通常是 "query" 和 "value"。可以通过 print(model) 查看模型结构来确定。
-    bias="none"               # 是否训练偏置项。"none" 表示不训练。
-)
-peft_model = get_peft_model(model, config)
-print("\nLoRA 模型可训练参数:")
-peft_model.print_trainable_parameters()
-
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, texts, labels, tokenizer):
@@ -86,7 +71,7 @@ val_dataset = Dataset(val_texts.reset_index(drop=True), val_labels.reset_index(d
 training_args = TrainingArguments(
     output_dir='./my_food_safety_model',
     num_train_epochs=3,
-    per_device_train_batch_size=16,
+    per_device_train_batch_size=64,
     save_total_limit=2,
     logging_dir='./logs',
     logging_steps=20,
@@ -106,7 +91,7 @@ training_args = TrainingArguments(
 )
 
 trainer = Trainer(
-    model=peft_model,
+    model=model,
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=val_dataset,
